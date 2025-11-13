@@ -21,20 +21,34 @@ for idx,item in enumerate(final_benchmark):
         {"role": "user", "content": item["cot_prompt"]}
     ]
     
-    # Call the v1/chat/completions endpoint
-    response = client.chat.completions.create(
-        model="tei",
-        messages=messages,
-        temperature=0.0
-    )
 
+    RETRYS = 0
+    while RETRYS >= 0:
+        try:
+            # Call the v1/chat/completions endpoint
+            response = client.chat.completions.create(
+                model="tei",
+                messages=messages,
+                temperature=0.0,
+                max_tokens=8000
+            )
+            break  # success → exit loop
+        except Exception as e:
+            print(f"Error: {e}")
+            RETRYS -= 1  # decrease retry counter
+            if RETRYS == -1:
+                response = "<answer> response failed </answer>"
+                break
+            else:
+                print(f"Retrying... ({RETRYS} left)")
     
-    # Extract model output
+    # Extract model iutput
     model_output = response.choices[0].message.content
     print(model_output)
 
     # Append simplified entry
     results.append({
+        "category": item["category"],
         "question": item["question"],
         "answer": item["answer"],
         "model_output": model_output
