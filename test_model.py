@@ -11,17 +11,15 @@ client = OpenAI(
 # Load benchmark dataset (with question, answer, cot_prompt)
 with open("benchmark_dataset.json", "r") as f:
     final_benchmark = json.load(f)
-print(1)
 # Collect simplified results
 results = []
 
-for item in final_benchmark:
-    print("HERE")
+for idx,item in enumerate(final_benchmark):
+    print("TURN: ", idx)
     messages = [
         {"role": "system", "content": "You are a helpful math assistant."},
         {"role": "user", "content": item["cot_prompt"]}
     ]
-    print("PROMPT: ", item["cot_prompt"])
     
     # Call the v1/chat/completions endpoint
     response = client.chat.completions.create(
@@ -30,7 +28,6 @@ for item in final_benchmark:
         temperature=0.0
     )
 
-    print("HERE AGAIN")
     
     # Extract model output
     model_output = response.choices[0].message.content
