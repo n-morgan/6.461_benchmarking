@@ -1,6 +1,6 @@
 # Math Algorithm Benchmark Project
 
-This repository benchmarks models on algorithmic math problems using chain-of-thought prompts. It includes scripts to generate benchmark data, test the model, and evaluate outputs.
+This repository benchmarks models on algorithmic math problems using prompts. It includes scripts to generate benchmark data, test the model, and evaluate outputs.
 
 ## File Structure
 
