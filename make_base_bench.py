@@ -56,21 +56,22 @@ def sample_by_category(dataset, algorithmsByGroup, n_per_algorithm):
 
 
 
-samples_by_category = sample_by_category(dataset, algorithmsByGroup, n_per_algorithm)
-# samples_by_category =  None
+# samples_by_category = sample_by_category(dataset, algorithmsByGroup, n_per_algorithm)
+samples_by_category =  None
 
 
-with open("sample_by_cat.json", "w") as f:
+# with open("sample_by_cat.json", "w") as f:
+# 
+#     json.dump(samples_by_category, f, indent=2)
+# 
 
-    json.dump(samples_by_category, f, indent=2)
+with open("sample_by_cat.json", "r") as f:
+    samples_by_category = json.load(f)
 
 
-#with open("sample_by_cat.json", "r") as f:
-#    samples_by_category = json.load(f)
-#
-#
-#
-#print(samples_by_category["graphs"]["dfs"][0])
+
+print(samples_by_category["searching"]["quickselect"])
+
 
 
 # for category, algos in samples_by_category.items():
@@ -104,12 +105,18 @@ def clean_question(question_str):
     question_clean = re.sub(r"trace \| .*?:", "", question_clean)
     return question_clean.strip()
 
+
 def parse_answer_to_list(answer_str):
     """
-    Extract all bracketed or parenthesized steps from the answer string.
-    Supports [] or ().
+    Split answer by commas until the final |.
+    Example: "5, 5, 5, 5 | 1" -> ["5","5","5","5","1"]
     """
-    steps = re.findall(r"(\[.*?\]|\(.*?\))", answer_str)
+    if "|" not in answer_str:
+        return [s.strip() for s in answer_str.split(",")]
+
+    left, right = answer_str.split("|", 1)
+    steps = [s.strip() for s in left.split(",") if s.strip()]
+    steps.append(right.strip())
     return steps
 
 
