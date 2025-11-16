@@ -1,0 +1,68 @@
+Question:
+insertion_sort:
+key: [0.308 0.498 0.552 0.16 0.347 0.738 0.28 0.175 0.522 0.707 0.824 0.886], 
+initial_trace: [0.308 0.498 0.552 0.16 0.347 0.738 0.28 0.175 0.522 0.707 0.824 0.886]
+
+
+Example Sorting Thought: 
+# --- Sorting Thought Schema ---
+
+sorting_thought_schema = {
+    "Step Metadata": {
+        "Step ID": 0,
+        "Algorithm / Sorting Strategy": "Insertion”
+        "Operation Type": "Insert”
+        "Explanation": "The question calls for using insertion_sort so the primary method of sorting will be inserting into a new sorted array
+    },
+
+    "Core State Representation": {
+        "Input Representation": {
+            "type": "list[Any]”
+	“Description”: [0.308 0.498 0.552 0.16 0.347 0.738 0.28 0.175 0.522 0.707 0.824 0.886]
+        },
+        "Current Stage": {
+         	“output_list”: [],
+        },
+        "Boundary of Sorted Region": [0:0],
+        "Remaining": [0:12],
+        "Termination Condition": {
+            "type": "bool",
+            "description": "output_list has the same length as the input and is fully sorted"
+        },
+    },
+
+    "Focused Action": {
+        "Current Element Focus": input[0],
+        "Comparison Target(s)": output_list[:len(output_list)]
+        "Operation Type": “insert”
+        "Reasoning / Action Plan": "insert input[0] into the location in output_list where the subsequent output list will be sorted”
+    }
+}
+
+# --- Core Iteration Process ---
+# This runnable block represents a general reasoning-based iteration process
+# for sorting using thought schema logic. It demonstrates how reasoning steps
+# could be executed dynamically without being tied to a specific algorithm.
+
+input_state = [5, 3, 1, 4]
+print("Initial State:", input_state)
+
+for i in range(len(input_state)):
+    current = input_state[i]             # Current Element Focus
+    comparison_targets = input_state[:i] # Comparison Targets
+    operation_type = "compare"           # Operation Type
+
+    # Reasoning / Action Plan:
+    # If current element is smaller than any of its previous elements,
+    # reposition it by swapping backward (insertion-like behavior).
+    for j in range(i - 1, -1, -1):
+        if input_state[j] > input_state[j + 1]:
+            # Swap operation
+            input_state[j], input_state[j + 1] = input_state[j + 1], input_state[j]
+            operation_type = "swap"
+        else:
+            # Already ordered correctly relative to target
+            Break
+
+<answer>[0.16 0.175 0.28 0.308 0.347 0.498 0.522 0.552 0.707 0.738 0.824 0.886]
+<\answer> 

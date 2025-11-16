@@ -1,0 +1,93 @@
+# --- Dynamic Programming Thought Schema ---
+
+dynamic_programming_thought_schema = {
+    "Step Metadata": {
+        "Step ID": None,
+        "Problem Name": "",
+        "Operation Type": "",  # e.g., "define subproblem", "compute recurrence", "fill table", "reconstruct solution"
+        "Explanation": "",  # Natural language reasoning for this step
+    },
+
+    "Core State Representation": {
+        "Input Representation": {
+            "type": "Any | list[Any] | dict[str, Any]",
+            "description": "Snapshot of the problem inputs.",
+        },
+        "Subproblem Table": {
+            "type": "list[Any] | dict[tuple, Any]",
+            "description": "Structure that stores solutions to subproblems (e.g., dp[i][j], memo[(i,j)]).",
+        },
+        "Current Subproblem Focus": {
+            "type": "tuple[int, ...] | str",
+            "description": "The subproblem currently being computed or considered.",
+        },
+        "Base Case": {
+            "type": "l",
+            "description": "When should the subproblem should return a direct value and what value should it return.",
+        },
+        "Termination Condition": {
+            "type": "bool | str",
+            "description": "Stopping condition signaling completion (e.g., 'all subproblems computed').",
+        },
+    },
+
+    "Focused Action": {
+        "Recurrence Application": {
+            "type": "Any",
+            "description": "Result of combining previously computed subproblems according to recurrence.",
+        },
+        "Decision Variables / Choices": {
+            "type": "Any | list[Any] | tuple",
+            "description": "Decision variables used in recurrence (e.g., split index, include/exclude).",
+        },
+        "Reasoning / Action Plan": {
+            "type": "str",
+            "description": "Describe the computation logic and intended updates to the DP table.",
+        },
+    }
+}
+
+# --- Core Iteration Process ---
+# This block demonstrates a general dynamic programming reasoning loop
+
+# Initialize general state containers
+dp_table: dict[Any, Any] = {}
+subproblem_order: list[Any] = []  # dynamically populated during computation
+termination_condition = False
+
+# Generic Computation:
+# In a real scenario, subproblem_order and dependencies would be generated
+# from the problem definition dynamically (e.g., recursion unrolling, table indices, etc.
+
+step_id = 0
+
+while not termination_condition:
+    # Dynamically decide next subproblem (abstract placeholder)
+    # In a real system, this would be determined from unmet dependencies or next table cell
+    current_subproblem = f"Subproblem_{step_id}"
+    subproblem_order.append(current_subproblem)
+
+    # Check if current subproblem qualifies as a base case
+    # (In practice, this would depend on indices or boundary conditions)
+    is_base_case = (step_id == 0)
+
+    if is_base_case:
+        dp_table[current_subproblem] = “”  # Base case placeholder value
+        operation_type = "base case"
+        reasoning = f"Identified {current_subproblem} as a base case
+    else:
+        # Gather dependent results dynamically from dp_table
+        dependent_subproblems = list(dp_table.keys())
+        dependent_values = [dp_table[sub] for sub in dependent_subproblems]
+
+        # Apply a generic recurrence combination rule (abstract)
+        dp_table[current_subproblem] = sum(dependent_values) + recurrence_value
+        operation_type = "compute recurrence"
+        reasoning = (
+            f"Computed {current_subproblem} using values from {dependent_subproblems} → {dp_table[current_subproblem]}"
+        )
+    step_id += 1
+
+    # Termination logic: 
+    If termination_conditions: 
+	break
