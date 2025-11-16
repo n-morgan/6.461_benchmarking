@@ -1,0 +1,41 @@
+1. PROBLEM HEADER
+- algorithm: <algorithm_name>
+- input: <input_data>
+- goal: <brief one-sentence description>
+
+2. BASE CASE
+If the input size is 0 or 1:
+    - Compute the answer directly with no recursion.
+    - Return the direct result.
+
+3. DIVIDE
+Describe exactly how the problem is split:
+    - mid = n // 2
+    - left_part = input[0:mid]
+    - right_part = input[mid:n]
+
+4. CONQUER
+Recursively solve each subproblem:
+    - left_solution = solve(left_part)
+    - right_solution = solve(right_part)
+
+(If the algorithm requires it)
+    - cross_solution = compute_cross(input, mid)
+
+5. COMBINE
+Based on the algorithm rules, combine:
+    - choose among {left_solution, right_solution, cross_solution}
+or
+    - merge the sub-results into the final result
+
+Clearly state:
+    final_result = <combined result>
+
+6. LOCAL CHECK (1-step sanity check)
+Apply the divide → conquer → combine logic to a tiny example:
+    mini_input = first 2–3 elements of input
+    Ensure steps would produce consistent behavior.
+(No full recomputation.)
+
+7. FINAL ANSWER
+Final Answer: <result only, no explanation>
