@@ -5,10 +5,13 @@ import re
 
 # Load dataset
 dataset = load_dataset("tomg-group-umd/CLRS-Text-test", split="test_1")  # or "train"
-print(dataset)
+# print(dataset)
 
+## OPTIONS: base, cot, react, scope 
 
-total_examples = 300
+# SELCTION = cot
+
+total_examples = 30
 
 # Algorithm groupings
 algorithmsByGroup = {
@@ -57,20 +60,40 @@ def sample_by_category(dataset, algorithmsByGroup, n_per_algorithm):
 
 
 # samples_by_category = sample_by_category(dataset, algorithmsByGroup, n_per_algorithm)
-samples_by_category =  None
+# samples_by_category =  None
 
 
-# with open("sample_by_cat.json", "w") as f:
+# with open("sample_by_cat_30.json", "w") as f:
 # 
 #     json.dump(samples_by_category, f, indent=2)
-# 
 
-with open("sample_by_cat.json", "r") as f:
+
+with open("sample_by_cat_30.json", "r") as f:
     samples_by_category = json.load(f)
 
 
 
 print(samples_by_category["searching"]["quickselect"])
+
+# print("\n===== DATASET SAMPLE CHECK =====\n")
+# 
+# for category, algos in samples_by_category.items():
+#     print(f"\n=== Category: {category} ===")
+#     
+#     for algo, examples in algos.items():
+#         print(f"\nAlgorithm: {algo}")
+#         if not examples:
+#             print("  (No examples found)")
+#             continue
+#         
+#         ex = examples[0]  # print ONE example only
+#         
+#         print("  Question:")
+#         print("   ", ex.get("question", "").strip())
+#         
+#         print("  Answer:")
+#         print("   ", ex.get("answer", "").strip())
+
 
 
 
@@ -84,16 +107,113 @@ BASE_PROMPT = """You are a helpful math assistant adept at solving math problems
 
 
 algorithm_name: {algorithm_name}
-example_output: {example_output}
+example_output_A: {example_output_A}
+example_output_B: {example_output_B}
 question: {question} 
 
 
-On a new line at the end of your response. Output your answer in the form of example_output with answer tags. DO NOT INCLUDE YOUR REASONING IN THE ANSWER TAGS
+On a new line at the end of your response. Output your answer in the form of example_output_A or example_output_B  with answer tags. DO NOT INCLUDE YOUR REASONING IN THE ANSWER TAGS
 
 <answer>[your answer here]</answer>
 
 """
 
+COT_PROMPT = """
+
+You are a helpful math assistant adept at solving math problems. Always show your reasoning **step by step** before giving the final answer.
+
+algorithm_name: Solve Linear Equation
+question: Solve 3x + 5 = 20
+example_output_A: 86
+example_output_B: 9
+
+reasoning: 
+Step 1: Identify the equation: 3x + 5 = 20
+Step 2: Isolate the variable by subtracting 5 from both sides: 3x = 15
+Step 3: Solve for x by dividing both sides by 3: x = 5
+
+<answer>5<\answer>
+
+---
+
+algorithm_name: Area of a Triangle
+question: What is the area of a triangle with base 10 units and height 6 units?
+example_output_A: 3
+example_output_B: 47
+
+reasoning:
+Step 1: Identify the base and height: base = 10, height = 6
+Step 2: Recall the area formula: A = 1/2 * base * height
+Step 3: Substitute values: A = 1/2 * 10 * 6
+Step 4: Multiply to find the area: A = 30
+
+<answer>30<\answer>
+
+---
+
+Now solve the following problem with clear, **step-by-step reasoning**. 
+
+algorithm_name: {algorithm_name}
+question: {question}
+example_output_A: {example_output_A}
+example_output_B: {example_output_B}
+
+reasoning: 
+[your reasoning here]
+
+On a new line at the end of your response. Output your answer in the form of example_output_A or example_output_B  with answer tags. DO NOT INCLUDE YOUR REASONING IN THE ANSWER TAGS
+
+<answer>[your answer here]</answer>
+"""
+
+REACT_PROMPT = """
+
+You are a helpful math assistant adept at solving math problems. Use the **ReACT approach**: for each step, show your reasoning, decide if an action is needed, perform the action if necessary, then continue reasoning. Conclude with the final answer in <answer> tags.
+
+algorithm_name: Solve Linear Equation with Reasoning and Action
+question: Solve 3x + 5 = 20
+example_output_A: 86
+example_output_B: 9
+reasoning: 
+Step 1: Identify the equation: 3x + 5 = 20
+Step 2: Reasoning: To solve for x, I need to isolate it.
+Step 3: Action: Subtract 5 from both sides → 3x = 15
+Step 4: Reasoning: Now divide both sides by 3 to find x
+Step 5: Action: Divide 15 by 3 → x = 5
+
+<answer>5<\answer>
+
+---
+
+algorithm_name: Area of a Triangle with Reasoning and Action
+question: What is the area of a triangle with base 10 units and height 6 units?
+example_output_A: 3
+example_output_B: 47
+reasoning: 
+Step 1: Identify base and height: base = 10, height = 6
+Step 2: Reasoning: The formula for area is A = 1/2 * base * height
+Step 3: Action: Substitute the values → A = 1/2 * 10 * 6
+Step 4: Reasoning: Multiply to compute the area
+Step 5: Action: 1/2 * 10 * 6 = 30
+
+<answer>30<\answer>
+
+---
+
+Now solve the following problem using the **ReACT approach**. Show step-by-step reasoning, take actions if needed. 
+
+algorithm_name: {algorithm_name}
+question: {question}
+example_output_A: {example_output_A}
+example_output_B: {example_output_B}
+
+
+On a new line at the end of your response. Output your answer in the form of example_output_A or example_output_B  with answer tags. DO NOT INCLUDE YOUR REASONING IN THE ANSWER TAGS
+
+<answer>[your answer here]</answer>
+
+
+"""
 # -----------------------------
 # Parse dataset answers and create prompts
 # -----------------------------
@@ -145,13 +265,15 @@ for category, algos in samples_by_category.items():
         for ex in examples:
             # Remove 'initial_trace trace | pred:' from question
             question_clean = clean_question(ex["question"])
-            example_output = parse_example_output(ex["answer"])
+            example_output_A = parse_example_output(ex["answer"])
+            example_output_B = parse_example_output(ex["answer"])
             final_answer = parse_final_answer(ex["answer"])
 
             # Fill in COT prompt
-            prompt = BASE_PROMPT.format(
+            prompt = REACT_PROMPT.format(
                 algorithm_name=algo,
-                example_output=example_output,
+                example_output_A=example_output_A,
+                example_output_B=example_output_B,
                 question=question_clean
             )
 
@@ -159,7 +281,8 @@ for category, algos in samples_by_category.items():
                 "category": category,
                 "algorithm": algo,
                 "question": question_clean,
-                "example_output": example_output,
+                "example_output_A": example_output_A,
+                "example_output_B": example_output_A,
                 "cot_prompt": prompt,
                 "answer": final_answer
             })
