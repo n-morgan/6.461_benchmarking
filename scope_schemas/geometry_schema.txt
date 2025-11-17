@@ -14,8 +14,6 @@ elif algo_name == "graham_scan":
     run GRAHAM_SCAN with question.graham_scan
 elif algo_name == "jarvis_march":
     run JARVIS_MARCH with question.jarvis_march
-else:
-    error "unsupported algo_name"
 
 -------------------------------------------------------------------------------
 SCHEMA 1: SEGMENT_INTERSECTION (numeric return 0/1)
