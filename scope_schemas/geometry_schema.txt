@@ -1,153 +1,153 @@
 GENERAL CONVENTIONS
-- Inputs come from:
-  question.points          # for Graham scan: list of points [(x0,y0), (x1,y1), ...]
-  question.segment_a       # for segment intersection: ((x1,y1), (x2,y2))
-  question.segment_b       # for segment intersection: ((x3,y3), (x4,y4))
-  question.initial_trace   # optional seed for symmetry with CLSR; not required here
-- algo_name selects: "segment_intersection" or "convex_hull_graham_scan"
-- Emit a TRACE of compact state snapshots (strings and small tuples), then a pipe, then a terminal record.
-- Example overall format:
-    "('step', '...'), ('step', '...') | ('final', '...')"
+- Inputs live under one of:
+    question.segment_intersection
+    question.graham_scan
+    question.jarvis_march
+- algo_name selects the procedure.
+- Emit a TRACE (sequence of snapshots) and then a terminal record after " | ".
+- Indices always refer to the original input order.
 
--------------------------------------------------------------------------------
 DISPATCHER (conceptual)
--------------------------------------------------------------------------------
 if algo_name == "segment_intersection":
-    run SEGMENT_INTERSECTION with:
-        segA = question.segment_a   # ((x1,y1), (x2,y2))
-        segB = question.segment_b   # ((x3,y3), (x4,y4))
-elif algo_name == "convex_hull_graham_scan":
-    run GRAHAM_SCAN with:
-        P = question.points         # list of (x,y)
+    run SEGMENT_INTERSECTION with question.segment_intersection
+elif algo_name == "graham_scan":
+    run GRAHAM_SCAN with question.graham_scan
+elif algo_name == "jarvis_march":
+    run JARVIS_MARCH with question.jarvis_march
 else:
     error "unsupported algo_name"
 
 -------------------------------------------------------------------------------
-SCHEMA 1: SEGMENT_INTERSECTION (two closed line segments in 2D)
+SCHEMA 1: SEGMENT_INTERSECTION (numeric return 0/1)
 -------------------------------------------------------------------------------
-Goal
-  Decide if closed segments A=(p1,p2) and B=(p3,p4) intersect. Optionally report the
-  intersection point in non-parallel, non-collinear proper crossing cases.
-
-Core primitives
-  orientation(a,b,c): returns sign of cross((b-a),(c-a))
-    > 0: counter-clockwise (CCW)
-    < 0: clockwise (CW)
-    = 0: collinear
-
-  on_segment(a,b,c): assuming orientation(a,b,c)==0, returns True iff c lies within
-    the axis-aligned bounding box of [a,b] (inclusive).
+Output (one line)
+  A short trace of orientation tests and the decided case, followed by " | " and ('final', r),
+  where r is 1 if the closed segments intersect, else 0.
 
 Inputs
-  segA = (p1, p2), segB = (p3, p4) where p* are (x,y) pairs (floats or ints)
+  question.segment_intersection:
+    segment_a: (p1, p2)   # p1=(x1,y1), p2=(x2,y2)
+    segment_b: (p3, p4)   # p3=(x3,y3), p4=(x4,y4)
+    eps: optional float tolerance (default 0)
+
+Primitives
+  orientation(a,b,c):
+      s = cross(b-a, c-a) with cross((ux,uy),(vx,vy)) = ux*vy - uy*vx
+      return  1 if s > eps,  -1 if s < -eps,  0 otherwise
+  on_segment(a,b,c):  # assuming orientation(a,b,c) == 0
+      return (min(ax,bx)-eps <= cx <= max(ax,bx)+eps) and
+             (min(ay,by)-eps <= cy <= max(ay,by)+eps)
 
 Pseudocode
   trace = []
-  p1, p2 = segA
-  p3, p4 = segB
+  p1,p2 = segment_a
+  p3,p4 = segment_b
+  o1 = orientation(p1,p2,p3); o2 = orientation(p1,p2,p4)
+  o3 = orientation(p3,p4,p1); o4 = orientation(p3,p4,p2)
+  append ("ori",(o1,o2,o3,o4)) to trace
 
-  o1 = orientation(p1, p2, p3)
-  o2 = orientation(p1, p2, p4)
-  o3 = orientation(p3, p4, p1)
-  o4 = orientation(p3, p4, p2)
-  append ("ori", (o1, o2, o3, o4)) to trace
-
-  # General proper intersection (strict)
-  if o1*o2 < 0 and o3*o4 < 0:
-      append ("case", "proper_cross") to trace
-      result = "intersect"
-
-      # Optional: compute intersection point for non-parallel lines
-      # Solve for p = p1 + t*(p2-p1) where lines p1p2 and p3p4 meet.
-      # Record (if needed): append ("point", (px, py)) to trace
-      goto TERMINAL
-
-  # Collinear or endpoint cases (degenerate)
-  if o1 == 0 and on_segment(p1,p2,p3): append ("case","p3_on_A") to trace ; result="intersect" ; goto TERMINAL
-  if o2 == 0 and on_segment(p1,p2,p4): append ("case","p4_on_A") to trace ; result="intersect" ; goto TERMINAL
-  if o3 == 0 and on_segment(p3,p4,p1): append ("case","p1_on_B") to trace ; result="intersect" ; goto TERMINAL
-  if o4 == 0 and on_segment(p3,p4,p2): append ("case","p2_on_B") to trace ; result="intersect" ; goto TERMINAL
-
-  # Otherwise disjoint
-  append ("case", "disjoint") to trace
-  result = "disjoint"
-
-TERMINAL
-  # Terminal record: ("final", result) or ("final", result, optional_point)
-  # Examples:
-  #   "... ('ori',(1,-1,1,-1)), ('case','proper_cross') | ('final','intersect')"
-  #   "... ('ori',(0,0,-1,1)), ('case','p3_on_A')       | ('final','intersect')"
-  #   "... ('ori',(1,1,-1,-1)), ('case','disjoint')     | ('final','disjoint')"
+  if (o1*o2 < 0) and (o3*o4 < 0):
+      append ("case","proper_cross") to trace ; r = 1
+  elif (o1 == 0 and on_segment(p1,p2,p3)):
+      append ("case","p3_on_A") to trace ; r = 1
+  elif (o2 == 0 and on_segment(p1,p2,p4)):
+      append ("case","p4_on_A") to trace ; r = 1
+  elif (o3 == 0 and on_segment(p3,p4,p1)):
+      append ("case","p1_on_B") to trace ; r = 1
+  elif (o4 == 0 and on_segment(p3,p4,p2)):
+      append ("case","p2_on_B") to trace ; r = 1
+  else:
+      append ("case","disjoint") to trace ; r = 0
 
 Output
-0 or 1, based on result
+  ('ori',(o1,o2,o3,o4)), ('case','...') | ('final', r)
 
 -------------------------------------------------------------------------------
-SCHEMA 2: CONVEX HULL (GRAHAM SCAN)
+SCHEMA 2: CONVEX_HULL — GRAHAM_SCAN (vector trace)
 -------------------------------------------------------------------------------
+Output (one line)
+  A comma-separated sequence of length-n 0/1 vectors marking the stack after each step,
+  followed by " | " and a final length-n 0/1 vector in_hull:
+  T1, T2, ..., Tk | H
 
 Inputs
   question.graham_scan:
-    x: [x0, x1, ..., x_{n-1}]          # x-coordinates of points P0..P_{n-1}
-    y: [y0, y1, ..., y_{n-1}]          # y-coordinates (same indexing)
-    initial_trace: [0, 0, ..., 0]      # length n; starts with no points marked
-
-Output shape
-  trace | in_hull:
-    answer:
-      T1, T2, ..., Tk | H
-  where each Ti and H are length-n 0/1 vectors aligned to original point indices.
-  - Ti[j] = 1  ⇔ point Pj is on the current hull stack after that step.
-  - H[j]  = 1  ⇔ point Pj is in the final convex hull.
+    x: [x0, x1, ..., x_{n-1}]
+    y: [y0, y1, ..., y_{n-1}]
+    initial_trace: [0, 0, ..., 0]   # length n (placeholder)
 
 Definitions
   Pj = (xj, yj)
-  orientation(a, b, c) = sign( (bx-ax)*(cy-ay) - (by-ay)*(cx-ax) )
-    > 0: left turn (CCW),  = 0: collinear,  < 0: right turn (CW)
-  pivot = index of point with minimum y; break ties by minimum x
-  angle ordering: sort all non-pivot points by polar angle around pivot (ties by distance from pivot)
+  orientation(a,b,c) = sign( (bx-ax)*(cy-ay) - (by-ay)*(cx-ax) )
+  pivot = argmin over j of (yj, then xj)
+  angle order = sort all indices except pivot by polar angle around pivot, tie by distance asc
 
-Pseudocode (stack maintenance with vector snapshots)
+Pseudocode
   n = len(x)
-  points = [(x0,y0), ..., (x_{n-1}, y_{n-1})] with fixed original indices 0..n-1
-  trace_vectors = []   # list of length-n 0/1 vectors
-
-  # 1) Select pivot
-  p = argmin_{j}( yj, then xj )
-
-  # 2) Sort remaining indices by angle around pivot (ties by distance asc)
-  order = sort( [j for j != p], key=(angle(p->j), dist(p->j)) )
-
-  # 3) Initialize stack with pivot
+  trace_vectors = []
+  p = pivot
+  order = sorted(indices != p by angle around p, then distance)
   S = [p]
-  # (Optional) If your dataset expects a first snapshot here, emit it:
-  # trace_vectors.append( snapshot(S) )
+  # Optional: trace_vectors.append( snapshot(S) )
 
-  # 4) Scan
   for q in order:
-      # Pop while last turn is not strictly left (≤ 0 removes collinear inward bends)
       while len(S) >= 2 and orientation(S[-2], S[-1], q) <= 0:
           S.pop()
-          # record a snapshot after EACH pop if your traces show intermediate changes
-          trace_vectors.append( snapshot(S) )
+          trace_vectors.append( snapshot(S) )    # emit after each pop if needed
       S.append(q)
-      # record a snapshot after the push
-      trace_vectors.append( snapshot(S) )
+      trace_vectors.append( snapshot(S) )        # emit after push
 
-  # 5) Final hull and emission
-  H = snapshot(S)                 # final 0/1 vector of the hull membership
-  Emit: T1, T2, ..., Tk | H       # where T* are the collected snapshots in order
+  H = snapshot(S)                                 # final in_hull vector
 
-snapshot(S): builds a length-n vector V with:
-  V[j] = 1 if j in S else 0, preserving the original index order (0..n-1)
+Output
+  H
 
-Notes and alignment to your example
-  - initial_trace is a zero vector to show the format; the algorithm does not reuse it,
-    but your emitted T1..Tk must be length-n vectors aligned to indices 0..n-1.
-  - If your dataset shows repeated vectors (e.g., same stack before/after a check),
-    you may record on both “pop” and “push” boundaries, yielding duplicates.
-  - The final in_hull vector H marks exactly the indices that remain on S at termination.
-    In some small or degenerate sets, all points can be extreme; then H may be all ones.
+-------------------------------------------------------------------------------
+SCHEMA 3: CONVEX_HULL — JARVIS_MARCH (Gift Wrapping, vector trace)
+-------------------------------------------------------------------------------
+Output (one line)
+  A comma-separated sequence of length-n 0/1 vectors marking the committed hull set after each wrapped vertex,
+  followed by " | " and a final length-n 0/1 vector in_hull:
+  T1, T2, ..., Tk | H
 
-Output:
-Final array in_hull
+Inputs
+  question.jarvis_march:
+    x: [x0, x1, ..., x_{n-1}]
+    y: [y0, y1, ..., y_{n-1}]
+    initial_trace: [0, 0, ..., 0]   # length n (placeholder)
+
+Definitions
+  Pj = (xj, yj)
+  orientation(a,b,c) by cross-product sign
+  dist2(a,b) = (ax-bx)^2 + (ay-by)^2
+  start s = argmin over j of (xj, then yj)   # leftmost; tie by lowest y
+
+Pseudocode
+  n = len(x)
+  Hset = { }
+  trace_vectors = []
+
+  s = start
+  Hset.add(s)
+  trace_vectors.append( snapshot(Hset) )
+  curr = s
+
+  while True:
+      q = any index != curr
+      for r in 0..n-1:
+          if r == curr or r == q: continue
+          turn = orientation(curr, q, r)
+          if turn < 0:
+              q = r
+          elif turn == 0 and dist2(curr, r) > dist2(curr, q):
+              q = r
+      if q == s:
+          break
+      Hset.add(q)
+      trace_vectors.append( snapshot(Hset) )
+      curr = q
+
+  H = snapshot(Hset)
+
+Output
+ H
