@@ -1,0 +1,180 @@
+GENERAL CONVENTIONS
+- Inputs come from:
+  question.key            # list of numbers
+  question.target         # number, only for binary_search
+  question.k              # integer 0-based, only for quicksearch
+  question.initial_trace  # tuple of two indices (a, b), inclusive
+- algo_name selects which procedure to run: binary_search, minimum_finding, quicksearch
+- We maintain and record a STATE TRACE of the main control variables per step
+- Trace format to emit: "(x1, y1), (x2, y2), ... | (xf, yf)"
+  Everything before "|" are intermediate states. The pair after "|" is the terminal state.
+
+-------------------------------------------------------------------------------
+DISPATCHER (conceptual)
+-------------------------------------------------------------------------------
+if algo_name == "binary_search":
+    run BINARY_SEARCH with:
+        key = question.key
+        target = question.target
+        (low, high) = question.initial_trace
+elif algo_name == "minimum_finding":
+    run MINIMUM_FINDING with:
+        key = question.key
+        (start, end) = question.initial_trace
+elif algo_name in {“quickselect"}:
+    run QUICKSEARCH with:
+        key = question.key
+        k = question.k
+        (low, high) = question.initial_trace
+
+-------------------------------------------------------------------------------
+SCHEMA 1: BINARY_SEARCH
+-------------------------------------------------------------------------------
+Goal
+  Given sorted array key and a target, narrow the interval [low, high] until the
+  search converges or finds an exact match. Record the interval after each update.
+
+Inputs
+  key: sorted ascending list of numbers
+  target: number to search
+  (low, high): inclusive indices, from question.initial_trace
+
+State and Invariant
+  Maintain low and high as inclusive bounds on the candidate region.
+  Invariant: all possible indices of the answer remain within [low, high] at each step.
+
+Pseudocode
+  trace = []                               # list of (low, high)
+  lo = low
+  hi = high
+  while lo <= hi:
+      mid = floor((lo + hi) / 2)
+      if key[mid] == target:
+          lo = mid
+          hi = mid
+          append (lo, hi) to trace
+          break
+      elif key[mid] < target:
+          lo = mid + 1                     # discard left half including mid
+          append (lo, hi) to trace
+      else:
+          hi = mid - 1                     # discard right half including mid
+          append (lo, hi) to trace
+
+  Final state
+    If target found, terminal state is (mid, mid).
+    If not found, loop exits with lo = insertion point and hi = lo - 1.
+    Terminal pair for output is (max(lo, 0), max(hi, -1)) or simply (lo, hi) if you prefer.
+
+Output
+  (lo, hi)
+
+-------------------------------------------------------------------------------
+SCHEMA 2: MINIMUM_FINDING (linear scan)
+-------------------------------------------------------------------------------
+Goal
+  Find the index of the minimum element in key within [start, end].
+  Record the active scan window as it progresses.
+
+Inputs
+  key: list of numbers
+  (start, end): inclusive scan bounds, from question.initial_trace
+
+State and Invariant
+  i moves from start to end, inclusive.
+  min_idx holds the index of the smallest value seen so far within [start, i].
+  The scan window after processing position i can be viewed as (i, end).
+
+Pseudocode
+  trace = []
+  i = start
+  j = end
+  min_idx = start
+  for pos in range(i, j + 1):
+      if key[pos] < key[min_idx]:
+          min_idx = pos
+      append (pos, j) to trace             # record progress of the scan
+
+  Final state
+    Terminal pair is (min_idx, min_idx).
+
+Output
+  (min_idx, min_idx)
+
+-------------------------------------------------------------------------------
+SCHEMA 3: QUICKSEARCH (quickselect for k-th order statistic)
+-------------------------------------------------------------------------------
+Goal
+  Return the k-th smallest element (0-based) from key within the current subarray.
+  Record the active subarray bounds (lo, hi) at each narrowing step.
+
+Inputs
+  key: list of numbers
+  k: integer, 0-based rank to select
+  (low, high): inclusive subarray bounds to search
+  Optional pivot rule (if needed by your dataset): "first", "last", "median_of_three"
+
+State and Invariant
+  Maintain lo and hi as inclusive bounds on the subarray where the k-th element lies.
+  At each step, partition around a pivot. After partition:
+    - All elements left of pivot_pos are less than the pivot value
+    - All elements right of pivot_pos are greater than or equal to the pivot value
+  Invariant: k remains within [lo, hi] and the sought element lies in that subarray.
+
+Pseudocode
+  trace = []
+  lo = low
+  hi = high
+  while lo <= hi:
+      append (lo, hi) to trace
+
+      # choose pivot index p_idx using a simple rule
+      # first:  p_idx = lo
+      # last:   p_idx = hi
+      # median_of_three: p_idx = median_index_of (lo, mid, hi)
+
+      pivot_pos = PARTITION(key, lo, hi, p_idx)
+
+      if pivot_pos == k:
+          # found exact rank
+          terminal = (k, k)
+          break
+      elif pivot_pos < k:
+          lo = pivot_pos + 1           # search right side
+      else:
+          hi = pivot_pos - 1           # search left side
+
+  Final state
+    If pivot_pos == k, terminal is (k, k).
+    Otherwise terminal is the collapsed interval (lo, hi) after the loop.
+
+Output
+	(lo, hi)
+
+PARTITION (Lomuto-style, index-based)
+  Input: array A, bounds [lo, hi], pivot_index p
+  Steps:
+    pivot = A[p]
+    swap A[p] and A[hi]
+    store = lo
+    for t from lo to hi - 1:
+        if A[t] < pivot:
+            swap A[t] and A[store]
+            store = store + 1
+    swap A[store] and A[hi]
+    return store   # final index of pivot
+
+Notes
+  Tracing records the subarray before partitioning at each step, which matches a common CLSR style.
+  If your worked examples prefer recording after the update, shift the append accordingly.
+
+-------------------------------------------------------------------------------
+TRACE STRING CONSTRUCTION
+-------------------------------------------------------------------------------
+Given:
+  intermediates = [(a1, b1), (a2, b2), ..., (am, bm)]
+  final_state = (af, bf)
+
+Produce:
+  if m > 0: "(a1, b1), (a2, b2), ..., (am, bm) | (af, bf)"
+  else:     "| (af, bf)"
