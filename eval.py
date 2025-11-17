@@ -8,9 +8,11 @@ def parse_model_answer(model_output: str) -> str:
     match = re.search(r"<answer>(.*?)</answer>", model_output, re.DOTALL)
     return match.group(1).strip() if match else ""
 
+
 def exact_match(ref: str, pred: str) -> bool:
-    """Simple exact match between reference and prediction."""
-    return ref.strip() == pred.strip()
+    def normalize(s: str) -> str:
+        return s.replace(",", "").split()
+    return normalize(ref) == normalize(pred)
 
 
 # Load the model-only benchmark dataset

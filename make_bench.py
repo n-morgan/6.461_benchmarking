@@ -179,7 +179,7 @@ Step 1: Identify the equation: 3x + 5 = 20
 Step 2: Isolate the variable by subtracting 5 from both sides: 3x = 15
 Step 3: Solve for x by dividing both sides by 3: x = 5
 
-<answer>5<\answer>
+<answer>5</answer>
 
 ---
 
@@ -194,7 +194,7 @@ Step 2: Recall the area formula: A = 1/2 * base * height
 Step 3: Substitute values: A = 1/2 * 10 * 6
 Step 4: Multiply to find the area: A = 30
 
-<answer>30<\answer>
+<answer>30</answer>
 
 ---
 
@@ -228,7 +228,7 @@ Step 3: Action: Subtract 5 from both sides → 3x = 15
 Step 4: Reasoning: Now divide both sides by 3 to find x
 Step 5: Action: Divide 15 by 3 → x = 5
 
-<answer>5<\answer>
+<answer>5</answer>
 
 ---
 
@@ -243,7 +243,7 @@ Step 3: Action: Substitute the values → A = 1/2 * 10 * 6
 Step 4: Reasoning: Multiply to compute the area
 Step 5: Action: 1/2 * 10 * 6 = 30
 
-<answer>30<\answer>
+<answer>30</answer>
 
 ---
 
@@ -282,7 +282,7 @@ algorithm_schema: {algorithm_schema}
 
 On a new line at the end of your response. Output your answer with answer tags. DO NOT INCLUDE YOUR REASONING IN THE ANSWER TAGS
 
-<answer>[your answer here]<\answer>
+<answer>[your answer here]</answer>
 
 """
 
@@ -332,7 +332,7 @@ def parse_final_answer(answer_str):
 # Build final benchmark dataset
 # -----------------------------
 final_benchmark = []
-CHOSEN_PROMPT = SCOPE_PROMPT
+CHOSEN_PROMPT = REACT_PROMPT 
 for category, algos in samples_by_category.items():
     for algo, examples in algos.items():
         for ex in examples:
@@ -375,7 +375,7 @@ for category, algos in samples_by_category.items():
                 "question": question_clean,
                 "example_output_A": example_output_A,
                 "example_output_B": example_output_A,
-                "cot_prompt": prompt,
+                "prompt": prompt,
                 "answer": final_answer
             })
 # -----------------------------

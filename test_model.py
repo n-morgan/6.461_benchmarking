@@ -18,7 +18,7 @@ for idx,item in enumerate(final_benchmark):
     print("TURN: ", idx)
     messages = [
         {"role": "system", "content": "You are a helpful math assistant."},
-        {"role": "user", "content": item["cot_prompt"]}
+        {"role": "user", "content": item["prompt"]}
     ]
     
 
