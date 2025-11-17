@@ -1,0 +1,151 @@
+GENERAL CONVENTIONS
+- Inputs live under one of:
+    question.segment_intersection
+    question.graham_scan
+    question.jarvis_march
+- algo_name selects the procedure.
+- Emit a TRACE (sequence of snapshots) and then a terminal record after " | ".
+- Indices always refer to the original input order.
+
+DISPATCHER (conceptual)
+if algo_name == "segment_intersection":
+    run SEGMENT_INTERSECTION with question.segment_intersection
+elif algo_name == "graham_scan":
+    run GRAHAM_SCAN with question.graham_scan
+elif algo_name == "jarvis_march":
+    run JARVIS_MARCH with question.jarvis_march
+
+-------------------------------------------------------------------------------
+SCHEMA 1: SEGMENT_INTERSECTION (numeric return 0/1)
+-------------------------------------------------------------------------------
+Output (one line)
+  A short trace of orientation tests and the decided case, followed by " | " and ('final', r),
+  where r is 1 if the closed segments intersect, else 0.
+
+Inputs
+  question.segment_intersection:
+    segment_a: (p1, p2)   # p1=(x1,y1), p2=(x2,y2)
+    segment_b: (p3, p4)   # p3=(x3,y3), p4=(x4,y4)
+    eps: optional float tolerance (default 0)
+
+Primitives
+  orientation(a,b,c):
+      s = cross(b-a, c-a) with cross((ux,uy),(vx,vy)) = ux*vy - uy*vx
+      return  1 if s > eps,  -1 if s < -eps,  0 otherwise
+  on_segment(a,b,c):  # assuming orientation(a,b,c) == 0
+      return (min(ax,bx)-eps <= cx <= max(ax,bx)+eps) and
+             (min(ay,by)-eps <= cy <= max(ay,by)+eps)
+
+Pseudocode
+  trace = []
+  p1,p2 = segment_a
+  p3,p4 = segment_b
+  o1 = orientation(p1,p2,p3); o2 = orientation(p1,p2,p4)
+  o3 = orientation(p3,p4,p1); o4 = orientation(p3,p4,p2)
+  append ("ori",(o1,o2,o3,o4)) to trace
+
+  if (o1*o2 < 0) and (o3*o4 < 0):
+      append ("case","proper_cross") to trace ; r = 1
+  elif (o1 == 0 and on_segment(p1,p2,p3)):
+      append ("case","p3_on_A") to trace ; r = 1
+  elif (o2 == 0 and on_segment(p1,p2,p4)):
+      append ("case","p4_on_A") to trace ; r = 1
+  elif (o3 == 0 and on_segment(p3,p4,p1)):
+      append ("case","p1_on_B") to trace ; r = 1
+  elif (o4 == 0 and on_segment(p3,p4,p2)):
+      append ("case","p2_on_B") to trace ; r = 1
+  else:
+      append ("case","disjoint") to trace ; r = 0
+
+Output
+  ('ori',(o1,o2,o3,o4)), ('case','...') | ('final', r)
+
+-------------------------------------------------------------------------------
+SCHEMA 2: CONVEX_HULL — GRAHAM_SCAN (vector trace)
+-------------------------------------------------------------------------------
+Output (one line)
+  A comma-separated sequence of length-n 0/1 vectors marking the stack after each step,
+  followed by " | " and a final length-n 0/1 vector in_hull:
+  T1, T2, ..., Tk | H
+
+Inputs
+  question.graham_scan:
+    x: [x0, x1, ..., x_{n-1}]
+    y: [y0, y1, ..., y_{n-1}]
+    initial_trace: [0, 0, ..., 0]   # length n (placeholder)
+
+Definitions
+  Pj = (xj, yj)
+  orientation(a,b,c) = sign( (bx-ax)*(cy-ay) - (by-ay)*(cx-ax) )
+  pivot = argmin over j of (yj, then xj)
+  angle order = sort all indices except pivot by polar angle around pivot, tie by distance asc
+
+Pseudocode
+  n = len(x)
+  trace_vectors = []
+  p = pivot
+  order = sorted(indices != p by angle around p, then distance)
+  S = [p]
+  # Optional: trace_vectors.append( snapshot(S) )
+
+  for q in order:
+      while len(S) >= 2 and orientation(S[-2], S[-1], q) <= 0:
+          S.pop()
+          trace_vectors.append( snapshot(S) )    # emit after each pop if needed
+      S.append(q)
+      trace_vectors.append( snapshot(S) )        # emit after push
+
+  H = snapshot(S)                                 # final in_hull vector
+
+Output
+  H
+
+-------------------------------------------------------------------------------
+SCHEMA 3: CONVEX_HULL — JARVIS_MARCH (Gift Wrapping, vector trace)
+-------------------------------------------------------------------------------
+Output (one line)
+  A comma-separated sequence of length-n 0/1 vectors marking the committed hull set after each wrapped vertex,
+  followed by " | " and a final length-n 0/1 vector in_hull:
+  T1, T2, ..., Tk | H
+
+Inputs
+  question.jarvis_march:
+    x: [x0, x1, ..., x_{n-1}]
+    y: [y0, y1, ..., y_{n-1}]
+    initial_trace: [0, 0, ..., 0]   # length n (placeholder)
+
+Definitions
+  Pj = (xj, yj)
+  orientation(a,b,c) by cross-product sign
+  dist2(a,b) = (ax-bx)^2 + (ay-by)^2
+  start s = argmin over j of (xj, then yj)   # leftmost; tie by lowest y
+
+Pseudocode
+  n = len(x)
+  Hset = { }
+  trace_vectors = []
+
+  s = start
+  Hset.add(s)
+  trace_vectors.append( snapshot(Hset) )
+  curr = s
+
+  while True:
+      q = any index != curr
+      for r in 0..n-1:
+          if r == curr or r == q: continue
+          turn = orientation(curr, q, r)
+          if turn < 0:
+              q = r
+          elif turn == 0 and dist2(curr, r) > dist2(curr, q):
+              q = r
+      if q == s:
+          break
+      Hset.add(q)
+      trace_vectors.append( snapshot(Hset) )
+      curr = q
+
+  H = snapshot(Hset)
+
+Output
+ H
