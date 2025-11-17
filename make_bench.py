@@ -3,9 +3,54 @@ import random
 import json
 import re
 
+import os
+
+SCHEMA_DIR = "scope_schemas"
+
+def load_schema_files(schema_dir=SCHEMA_DIR):
+    """
+    Loads all *_schema.txt and *_example.txx files into a dictionary:
+
+    {
+        name: {
+            "schema": "...",
+            "example": "..."
+        }
+    }
+    """
+    data = {}
+
+    for fname in os.listdir(schema_dir):
+        fpath = os.path.join(schema_dir, fname)
+
+        # skip directories
+        if not os.path.isfile(fpath):
+            continue
+
+        # match *_schema.txt
+        if fname.endswith("_schema.txt"):
+            name = fname[:-len("_schema.txt")]
+            with open(fpath, "r") as f:
+                data.setdefault(name, {})["schema"] = f.read()
+
+        # match *_example.txx
+        elif fname.endswith("_example.txt"):
+            name = fname[:-len("_example.txt")]
+            with open(fpath, "r") as f:
+                data.setdefault(name, {})["example"] = f.read()
+
+    return data
+
+
+
+category_schemas = load_schema_files()
+
 # Load dataset
 dataset = load_dataset("tomg-group-umd/CLRS-Text-test", split="test_1")  # or "train"
 # print(dataset)
+
+
+
 
 ## OPTIONS: base, cot, react, scope 
 
@@ -28,6 +73,8 @@ algorithmsByGroup = {
     "strings": ["naive_string_matcher", "kmp_matcher"],
     "geometry": ["segments_intersect", "graham_scan", "jarvis_march"]
 }
+
+
 
 # Compute number of algorithms and examples per algorithm
 all_algorithms = [algo for group in algorithmsByGroup.values() for algo in group]
@@ -214,6 +261,32 @@ On a new line at the end of your response. Output your answer in the form of exa
 
 
 """
+
+
+
+
+SCOPE_PROMPT = """
+You are a helpful math assistant adept at solving math problems. 
+algorithm_name: {algorithm_name}
+example_output_A: {example_output_A}
+example_output_B: {example_output_B}
+
+
+
+Use the following schema to work through your thought process
+
+worked_example: {worked_example}
+question: {question}
+algorithm_schema: {algorithm_schema}
+
+
+On a new line at the end of your response. Output your answer with answer tags. DO NOT INCLUDE YOUR REASONING IN THE ANSWER TAGS
+
+<answer>[your answer here]<\answer>
+
+"""
+
+
 # -----------------------------
 # Parse dataset answers and create prompts
 # -----------------------------
@@ -259,7 +332,7 @@ def parse_final_answer(answer_str):
 # Build final benchmark dataset
 # -----------------------------
 final_benchmark = []
-
+CHOSEN_PROMPT = SCOPE_PROMPT
 for category, algos in samples_by_category.items():
     for algo, examples in algos.items():
         for ex in examples:
@@ -270,12 +343,31 @@ for category, algos in samples_by_category.items():
             final_answer = parse_final_answer(ex["answer"])
 
             # Fill in COT prompt
-            prompt = REACT_PROMPT.format(
-                algorithm_name=algo,
-                example_output_A=example_output_A,
-                example_output_B=example_output_B,
-                question=question_clean
-            )
+            if CHOSEN_PROMPT == SCOPE_PROMPT:
+                
+                schema_text = category_schemas.get(category, {}).get("schema")
+                example_text = category_schemas.get(category, {}).get("example")
+                
+                worked_example=schema_text
+                algorithm_schema=example_text
+                prompt = CHOSEN_PROMPT.format(
+                    algorithm_name=algo,
+                    example_output_A=example_output_A,
+                    example_output_B=example_output_B, 
+                    question=question_clean,
+                    worked_example=worked_example,
+                    algorithm_schema=algorithm_schema, 
+
+    
+                )
+                
+            else: 
+                prompt = CHOSEN_PROMPT.format(
+                    algorithm_name=algo,
+                    example_output_A=example_output_A,
+                    example_output_B=example_output_B,
+                    question=question_clean
+                )
 
             final_benchmark.append({
                 "category": category,

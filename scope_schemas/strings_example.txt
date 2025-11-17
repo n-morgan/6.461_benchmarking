@@ -1,0 +1,58 @@
+
+
+
+"""-- String Matching Algorithm Schema (Supports Naive & KMP)
+
+-- Input
+input = {
+    "algorithm": "<algorithm_name>",   # "Naive" or "KMP"
+    "string": [],                      # list of symbols representing the main text
+    "pattern": [],                     # only for Naive
+    "key": [],                         # prefix-function for KMP (only for KMP)
+    "example_output": None             # optional
+}
+
+-- Step 1: Initialize State
+state = {}
+state["first_match"] = None            # stores the first match index
+if input["algorithm"] == "Naive":
+    state["string_length"] = len(input["string"])
+    state["pattern_length"] = len(input["pattern"])
+elif input["algorithm"] == "KMP":
+    state["pi"] = input["key"]         # prefix-function array
+    state["current_index"] = 0         # current index in string
+    state["pattern_index"] = 0         # current index in pattern (implicit from key)
+    state["string_length"] = len(input["string"])
+    state["pattern_length"] = len(input["key"])
+
+-- Step 2: Preprocess pattern (Naive does not need; KMP key is provided)
+# For Naive: no preprocessing
+# For KMP: key is already provided
+
+-- Step 3: Search / Iterate through string
+if input["algorithm"] == "Naive":
+    for s in range(state["string_length"] - state["pattern_length"] + 1):
+        match = True
+        for i in range(state["pattern_length"]):
+            if input["string"][s + i] != input["pattern"][i]:
+                match = False
+                break
+        if match:
+            state["first_match"] = s
+            break
+elif input["algorithm"] == "KMP":
+    for state["current_index"] in range(state["string_length"]):
+        while state["pattern_index"] > 0 and input["string"][state["current_index"]] != input["string"][state["pattern_index"]]:
+            state["pattern_index"] = state["pi"][state["pattern_index"] - 1]
+        if input["string"][state["current_index"]] == input["string"][state["pattern_index"]]:
+            state["pattern_index"] += 1
+        if state["pattern_index"] == state["pattern_length"]:
+            state["first_match"] = state["current_index"] - state["pattern_length"] + 1
+            break
+
+-- Step 4: Return final output
+output = state["first_match"]    # first match index
+
+return output
+"""
+
