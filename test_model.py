@@ -1,6 +1,7 @@
 import re
 import json
 import os
+import time
 from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
@@ -32,10 +33,15 @@ N_PROMPTS, DATASETS = load_datasets()
 
 PROJECT_DIR = Path(__file__).parent
 
+def ensure_dir(dir: str) -> Path:
+    path = PROJECT_DIR / dir
+    path.mkdir(exist_ok=True)
+    return path
+
+
 def setup_log_files() -> tuple[dict[str, Path]]:
     # Setup log directory
-    log_dir = PROJECT_DIR / "logs"
-    log_dir.mkdir(exist_ok=True, parents=True)
+    log_dir = ensure_dir("logs")
 
     base = "model_responses"
 
@@ -149,14 +155,19 @@ def compute_and_save_results() -> None:
     with ThreadPoolExecutor(max_workers=N_WORKERS) as executor:
         aggregate_results = executor.map(extract_model_output, ids, prompts)
     grouped_results = group_results_by_method(aggregate_results)
+    output_dir = ensure_dir("model_outputs")
     for method, result_entries in grouped_results.items():
-        with open(PROJECT_DIR / f"{method}_model_responses.json", "w") as f:
+        with open(output_dir / f"{method}_model_responses.json", "w") as f:
             json.dump(result_entries, f, indent=2)
 
 
-compute_and_save_results()
+if __name__ == "__main__":
+    start_time = time.perf_counter()
+    compute_and_save_results()
+    duration = time.perf_counter() - start_time
 
+    print(f"\nTook {duration:.3f} seconds!\n")
 
-print(f"Saved questions, answers, and model outputs to \"{{method_name}}_model_responses.json\"")
-print(f"Saved output messages to \"{{method_name}}_model_responses.out\"")
-print(f"Saved error messages to \"{{method_name}}_model_responses.err\"")
+    print(f"Saved questions, answers, and model outputs to \"model_outputs/{{method_name}}_model_responses.json\"")
+    print(f"Saved output messages to \"logs/{{method_name}}_model_responses.out\"")
+    print(f"Saved error messages to \"logs/{{method_name}}_model_responses.err\"")
