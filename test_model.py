@@ -39,7 +39,7 @@ def ensure_dir(dir: str) -> Path:
     return path
 
 
-def setup_log_files() -> tuple[dict[str, Path]]:
+def setup_log_files() -> tuple[dict[str, Path], dict[str, Path]]:
     # Setup log directory
     log_dir = ensure_dir("logs")
 
@@ -92,7 +92,7 @@ def safe_err_log(method: str, *args: Any, **kwargs: Any) -> None:
 def aggregate_benchmarks() -> tuple[list[Any], list[Any]]:
     ids, aggregate_prompts = [], []
     for method, prompts in DATASETS.items():
-        aggregate_prompts.extend(prompts)
+        aggregate_prompts.extend(prompts[:N_PROMPTS])
         # (prompt index (1-indexed) in resp. dataset, method string (e.g. "base", "scope", "cot", etc.))
         ids.extend(zip(range(1, N_PROMPTS+1), [method] * N_PROMPTS))
     return ids, aggregate_prompts
