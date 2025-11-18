@@ -56,7 +56,7 @@ dataset = load_dataset("tomg-group-umd/CLRS-Text-test", split="test_1")  # or "t
 
 # SELCTION = cot
 
-total_examples = 30
+total_examples = 3000
 
 # Algorithm groupings
 algorithmsByGroup = {
@@ -107,15 +107,15 @@ def sample_by_category(dataset, algorithmsByGroup, n_per_algorithm):
 
 
 # samples_by_category = sample_by_category(dataset, algorithmsByGroup, n_per_algorithm)
-# samples_by_category =  None
+samples_by_category =  None
 
 
-# with open("sample_by_cat_30.json", "w") as f:
+# with open("sample_by_cat_3000.json", "w") as f:
 # 
 #     json.dump(samples_by_category, f, indent=2)
 
 
-with open("sample_by_cat_30.json", "r") as f:
+with open("dataset_samples/sample_by_cat_3000.json", "r") as f:
     samples_by_category = json.load(f)
 
 
@@ -286,6 +286,58 @@ On a new line at the end of your response. Output your answer with answer tags. 
 
 """
 
+SCOPE_PROMPT = """
+
+
+You are a helpful math assistant adept at solving math problems. 
+
+algorithm_name: {algorithm_name}
+example_output_A: {example_output_A}
+example_output_B: {example_output_B}
+
+Use the following schema to work through your thought process:
+
+worked_example: {worked_example}
+
+question: {question}
+algorithm_schema: {algorithm_schema}
+
+Instructions for final answer:
+- After completing your reasoning, output **only the final answer** in the exact form of example_output_A or example_output_B.
+- The final answer **must be enclosed exactly in <answer>...</answer>** tags.
+- Do not include any reasoning, explanation, or extra text inside the answer tags.
+- Place the `<answer>` line on a new line at the very end of your response.
+
+<answer>[your answer here]<\answer>
+"""
+
+
+SCOPE_PROMPT = """
+
+You are a helpful math assistant adept at solving math problems. 
+
+algorithm_name: {algorithm_name}
+example_output_A: {example_output_A}
+example_output_B: {example_output_B}
+
+You **should use the schema** below to guide your reasoning, but you can adapt it if necessary.  
+Your reasoning will **not** be scored — only the final answer in the tags counts.
+
+worked_example: {worked_example}
+
+question: {question}
+algorithm_schema: {algorithm_schema}
+
+Instructions for reasoning and final answer:
+1. You should follow the algorithm_schema when reasoning and performing intermediate steps, but adapt as needed for the problem.
+2. Show your reasoning freely in text above the final answer — include any calculations, checks, or sub-steps.
+3. After reasoning, output **only the final answer** in the exact form of example_output_A or example_output_B.
+4. The final answer must be enclosed exactly in `<answer>...</answer>` tags.
+5. Place the `<answer>` line on a new line at the very end of your response.
+6. Do not include any reasoning, calculations, or extra text inside the `<answer>` tags.
+
+<answer>[your answer here]<\answer>
+"""
 
 # -----------------------------
 # Parse dataset answers and create prompts
@@ -332,7 +384,7 @@ def parse_final_answer(answer_str):
 # Build final benchmark dataset
 # -----------------------------
 final_benchmark = []
-CHOSEN_PROMPT = REACT_PROMPT 
+CHOSEN_PROMPT = REACT_PROMPT
 for category, algos in samples_by_category.items():
     for algo, examples in algos.items():
         for ex in examples:
@@ -381,7 +433,7 @@ for category, algos in samples_by_category.items():
 # -----------------------------
 # Save to JSON
 # -----------------------------
-with open("benchmark_dataset.json", "w") as f:
+with open("benchmark_dataset_3000_react.json", "w") as f:
     json.dump(final_benchmark, f, indent=2)
 
 print(f"Saved {len(final_benchmark)} benchmark examples to benchmark_dataset.json")

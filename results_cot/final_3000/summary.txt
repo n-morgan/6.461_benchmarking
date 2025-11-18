@@ -1,0 +1,15 @@
+
+Benchmark completed: 611/3000 correct
+Exact match accuracy: 20.37%
+
+Per-category accuracy:
+  divideAndConquer: 10/100 = 10.00%
+  dynamicProgramming: 1/300 = 0.33%
+  geometry: 92/300 = 30.67%
+  graphs: 184/1200 = 15.33%
+  greedy: 24/200 = 12.00%
+  searching: 55/300 = 18.33%
+  sorting: 209/400 = 52.25%
+  strings: 36/200 = 18.00%
+
+Saved scored dataset to benchmark_dataset_scored.json

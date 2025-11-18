@@ -9,7 +9,7 @@ client = OpenAI(
 )
 
 # Load benchmark dataset (with question, answer, cot_prompt)
-with open("benchmark_dataset.json", "r") as f:
+with open("benchmark_dataset_3000_cot.json", "r") as f:
     final_benchmark = json.load(f)
 # Collect simplified results
 results = []
@@ -45,6 +45,7 @@ for idx,item in enumerate(final_benchmark):
     # Extract model iutput
     model_output = response.choices[0].message.content
     print(model_output)
+    print()
 
     # Append simplified entry
     results.append({
