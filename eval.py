@@ -16,7 +16,7 @@ def exact_match(ref: str, pred: str) -> bool:
 
 
 # Load the model-only benchmark dataset
-with open("model_responses.json", "r") as f:
+with open("model_responses_trial.json", "r") as f:
     data = json.load(f)
 
 # Containers for score tracking
@@ -59,7 +59,7 @@ for cat in sorted(category_total.keys()):
     print(f"  {cat}: {c}/{t} = {100*c/t:.2f}%")
 
 # Save scored dataset
-with open("benchmark_dataset_scored.json", "w") as f:
+with open("benchmark_dataset_scored_300.json", "w") as f:
     json.dump(data, f, indent=2)
 
 print("\nSaved scored dataset to benchmark_dataset_scored.json")

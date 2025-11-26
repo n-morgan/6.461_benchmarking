@@ -9,7 +9,7 @@ client = OpenAI(
 )
 
 # Load benchmark dataset (with question, answer, cot_prompt)
-with open("benchmark_dataset_3000_cot.json", "r") as f:
+with open("benchmark_datasets/300/benchmark_dataset_300_scope.json", "r") as f:
     final_benchmark = json.load(f)
 # Collect simplified results
 results = []
@@ -30,7 +30,9 @@ for idx,item in enumerate(final_benchmark):
                 model="tei",
                 messages=messages,
                 temperature=0.0,
-                max_tokens=8000
+                max_tokens=8000,
+                tools=[],
+                tool_choice="none",
             )
             break  # success → exit loop
         except Exception as e:

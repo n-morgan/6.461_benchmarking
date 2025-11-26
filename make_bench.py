@@ -56,7 +56,7 @@ dataset = load_dataset("tomg-group-umd/CLRS-Text-test", split="test_1")  # or "t
 
 # SELCTION = cot
 
-total_examples = 3000
+total_examples = 30
 
 # Algorithm groupings
 algorithmsByGroup = {
@@ -110,12 +110,12 @@ def sample_by_category(dataset, algorithmsByGroup, n_per_algorithm):
 samples_by_category =  None
 
 
-# with open("sample_by_cat_3000.json", "w") as f:
+# with open("sample_by_cat_30.json", "w") as f:
 # 
 #     json.dump(samples_by_category, f, indent=2)
 
 
-with open("dataset_samples/sample_by_cat_3000.json", "r") as f:
+with open("dataset_samples/raw_samples/sample_by_cat_300.json", "r") as f:
     samples_by_category = json.load(f)
 
 
@@ -325,7 +325,6 @@ Your reasoning will **not** be scored — only the final answer in the tags coun
 
 worked_example: {worked_example}
 
-question: {question}
 algorithm_schema: {algorithm_schema}
 
 Instructions for reasoning and final answer:
@@ -336,7 +335,10 @@ Instructions for reasoning and final answer:
 5. Place the `<answer>` line on a new line at the very end of your response.
 6. Do not include any reasoning, calculations, or extra text inside the `<answer>` tags.
 
-<answer>[your answer here]<\answer>
+
+This is your question to solve
+question: {question}
+
 """
 
 # -----------------------------
@@ -383,60 +385,74 @@ def parse_final_answer(answer_str):
 # -----------------------------
 # Build final benchmark dataset
 # -----------------------------
-final_benchmark = []
-CHOSEN_PROMPT = REACT_PROMPT
-for category, algos in samples_by_category.items():
-    for algo, examples in algos.items():
-        for ex in examples:
-            # Remove 'initial_trace trace | pred:' from question
-            question_clean = clean_question(ex["question"])
-            example_output_A = parse_example_output(ex["answer"])
-            example_output_B = parse_example_output(ex["answer"])
-            final_answer = parse_final_answer(ex["answer"])
 
-            # Fill in COT prompt
-            if CHOSEN_PROMPT == SCOPE_PROMPT:
-                
-                schema_text = category_schemas.get(category, {}).get("schema")
-                example_text = category_schemas.get(category, {}).get("example")
-                
-                worked_example=schema_text
-                algorithm_schema=example_text
-                prompt = CHOSEN_PROMPT.format(
-                    algorithm_name=algo,
-                    example_output_A=example_output_A,
-                    example_output_B=example_output_B, 
-                    question=question_clean,
-                    worked_example=worked_example,
-                    algorithm_schema=algorithm_schema, 
+# CHOSEN_PROMPT = REACT_PROMPT
 
-    
-                )
-                
-            else: 
-                prompt = CHOSEN_PROMPT.format(
-                    algorithm_name=algo,
-                    example_output_A=example_output_A,
-                    example_output_B=example_output_B,
-                    question=question_clean
-                )
+file_name_mapping = {BASE_PROMPT:"base",
+                     COT_PROMPT: "cot",
+                     REACT_PROMPT: "react",
+                     SCOPE_PROMPT: "scope"}
 
-            final_benchmark.append({
-                "category": category,
-                "algorithm": algo,
-                "question": question_clean,
-                "example_output_A": example_output_A,
-                "example_output_B": example_output_A,
-                "prompt": prompt,
-                "answer": final_answer
-            })
+# chosen_categories = [BASE_PROMPT, COT_PROMPT, REACT_PROMPT]
+chosen_categories = [BASE_PROMPT, COT_PROMPT, REACT_PROMPT, SCOPE_PROMPT]
+
+for CHOSEN_PROMPT in chosen_categories:
+    final_benchmark = []
+
+    file_id = file_name_mapping[CHOSEN_PROMPT]
+
+    for category, algos in samples_by_category.items():
+        for algo, examples in algos.items():
+            for ex in examples:
+                # Remove 'initial_trace trace | pred:' from question
+                question_clean = clean_question(ex["question"])
+                example_output_A = parse_example_output(ex["answer"])
+                example_output_B = parse_example_output(ex["answer"])
+                final_answer = parse_final_answer(ex["answer"])
+
+                # Fill in COT prompt
+                if CHOSEN_PROMPT == SCOPE_PROMPT:
+                    
+                    schema_text = category_schemas.get(category, {}).get("schema")
+                    example_text = category_schemas.get(category, {}).get("example")
+                    
+                    worked_example=schema_text
+                    algorithm_schema=example_text
+                    prompt = CHOSEN_PROMPT.format(
+                        algorithm_name=algo,
+                        example_output_A=example_output_A,
+                        example_output_B=example_output_B, 
+                        question=question_clean,
+                        worked_example=worked_example,
+                        algorithm_schema=algorithm_schema, 
+
+        
+                    )
+                    
+                else: 
+                    prompt = CHOSEN_PROMPT.format(
+                        algorithm_name=algo,
+                        example_output_A=example_output_A,
+                        example_output_B=example_output_B,
+                        question=question_clean
+                    )
+
+                final_benchmark.append({
+                    "category": category,
+                    "algorithm": algo,
+                    "question": question_clean,
+                    "example_output_A": example_output_A,
+                    "example_output_B": example_output_A,
+                    "prompt": prompt,
+                    "answer": final_answer
+                })
 # -----------------------------
 # Save to JSON
 # -----------------------------
-with open("benchmark_dataset_3000_react.json", "w") as f:
-    json.dump(final_benchmark, f, indent=2)
+    with open(f"benchmark_datasets/300/benchmark_dataset_300_{file_id}.json", "w") as f:
+        json.dump(final_benchmark, f, indent=2)
 
-print(f"Saved {len(final_benchmark)} benchmark examples to benchmark_dataset.json")
+    print(f"Saved {len(final_benchmark)} benchmark examples to benchmark_dataset_{file_id}.json")
 
 
 
