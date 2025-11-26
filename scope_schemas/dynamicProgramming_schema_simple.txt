@@ -1,0 +1,52 @@
+# --- Dynamic Programming Thought Schema ---
+
+dynamic_programming_thought_schema = {
+    "Algorithm Step Tracker": {
+        "Step Number": “int”,
+        "Current Subproblem”: “tuple[int, …] | str” #"The subproblem currently being computed or considered.",
+    },
+
+    "Core State Representation": {
+        "Subproblem Table": {
+            "type": "list[Any] | dict[tuple, Any]",
+            "description": "Structure that stores solutions to subproblems (e.g., dp[i][j], memo[(i,j)]).",
+        },
+        "Base Cases": {
+            "type": "l",
+            "description": "When should the subproblem should return a direct value and what value should it return.",
+        },
+    },
+
+    "Focused Action": {
+        "Recurrence Application": {
+            "type": "Any",
+            "description": "Result of combining previously computed subproblems according to recurrence.",
+        },
+        "Decision Variables / Choices": {
+            "type": "Any | list[Any] | tuple",
+            "description": "Decision variables used in recurrence (e.g., split index, include/exclude).",
+        },
+    }
+}
+
+# --- Core Iteration Process ---
+# This block demonstrates a general dynamic programming reasoning loop:
+
+# Generic Computation:
+
+while not termination_condition:
+    # Dynamically decide next subproblem (abstract placeholder)
+    # In a real system, this would be determined from unmet dependencies or next table cell
+
+    # Check if current subproblem qualifies as a base case
+   
+    if is_base_case:
+        #Return base case value
+    else:
+        # Gather dependent results dynamically from dp_table
+        # Apply a generic recurrence combination rule (abstract)
+
+ # Termination logic: 
+ #If termination condition is met break the while loop
+
+

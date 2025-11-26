@@ -1,0 +1,30 @@
+Question:
+insertion_sort:
+key: [0.308 0.498 0.552 0.16 0.347 0.738 0.28 0.175 0.522 0.707 0.824 0.886], 
+initial_trace: [0.308 0.498 0.552 0.16 0.347 0.738 0.28 0.175 0.522 0.707 0.824 0.886]
+
+
+Example Sorting Thought: 
+# --- Sorting Thought Schema ---
+
+sorting_thought_schema = {
+    "Algorithm Step Tracker": {
+        "Step Number": 0,
+        "Algorithm / Sorting Strategy": "Insertion”
+    },
+
+    "Core State Representation": {
+        "Current State": {
+         	“output_list”: [],
+        },
+        "Remaining": [0:12],
+    },
+
+    "Focused Action": {
+        "Current Element Focus": input[0],
+        "Comparison Target(s)": output_list[:len(output_list)]
+    }
+}
+
+<answer>[0.16 0.175 0.28 0.308 0.347 0.498 0.522 0.552 0.707 0.738 0.824 0.886]
+<\answer> 

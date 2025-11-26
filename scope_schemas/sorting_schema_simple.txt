@@ -1,0 +1,32 @@
+# --- Sorting Thought Schema ---
+
+sorting_thought_schema = {
+    "Algorithm Step Tracker": {
+        "Step Number": int,
+        "Algorithm”: str #What sorting algorithm to use.
+    },
+
+    "Core State Representation": {
+        "Current State": {
+            "type": "list[Any] | dict[str, Any]",
+            "description": "Internal representation of how the input is progressing (e.g., heapified array, partitioned sublists).",
+        },
+        "Remaining": {
+            "type": "list[int] | tuple[int, int]",
+            "description": "Track what part of the input still needs sorting.",
+        },
+    },
+
+    "Focused Action": {
+        "Current Element Focus": {
+            "type": "Any | int | float | str",
+            "description": "Element and index currently being compared, inserted, or swapped.",
+            # Example: current = arr[i]
+        },
+        "Comparison Target(s)": {
+            "type": "Any | list[Any]",
+            "description": "Element(s) or region of input that the current element is being compared or sorted against.",
+            # Example: arr[i-1] or arr[j:]
+        },
+    }
+}

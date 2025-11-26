@@ -1,0 +1,57 @@
+Question optimal_bst:
+p: [0.06 0.116 0.097 0.007 0], q: [0.022 0.179 0.166 0.167 0.184], 
+initial_trace: [[0 0 0 0 0], [0 0 0 0 0], [0 0 0 0 0], [0 0 0 0 0], [0 0 0 0 0]]
+
+dynamic_programming_thought_schema = {
+    "Algorithm Step Tracker": {
+        "Step Number”: 0,
+        “Current Subproblem”:  e[1][n] #The subproblem currently being computed or considered. This is the first initial recursive call to the solution
+ },
+
+    "Core State Representation": {
+        "Subproblem Table": {
+            "type": “Dictionary",
+            "description": “e[i][j] – e is a dictionary representing the expected cost for searching tree spanning i to j",
+        },
+        "Base Case Indicator": {
+            "type": e[i][i-1],
+            "description": “return q_{i-1}”
+        },
+    },
+
+    "Focused Action": {
+        "Recurrence Application": {
+            "type": e[i][j]=min_{r=i}^{j}​(e[i][r−1]+e[r+1][j]+w[i][j])  where w[i][j] = sum from k=1 to i of p_k + sum from k=1 to j of q_k
+            "description": "Result of combining previously computed subproblems according to recurrence.",
+        },
+        "Decision Variables / Choices": {
+            "type": "[i,j]",
+            "description": "choose j that minimizes the expression in “Recurrence Application",
+        },
+    }
+}
+
+# --- Core Iteration Process ---
+# This block demonstrates a general dynamic programming reasoning loop:
+
+# Generic Computation:
+
+while not termination_condition:
+    # Dynamically decide next subproblem (abstract placeholder)
+    # In a real system, this would be determined from unmet dependencies or next table cell
+
+    # Check if current subproblem qualifies as a base case
+   
+    if is_base_case:
+        #Return base case value
+    else:
+        # Gather dependent results dynamically from dp_table
+        # Apply a generic recurrence combination rule (abstract)
+
+ # Termination logic: 
+ #If termination condition is met break the while loop
+
+
+
+<answer> [[0 0 1 1 2], [0 0 1 1 2], [0 0 0 2 2], [0 0 0 0 3], [0 0 0 0 0]]<\answer>
+
