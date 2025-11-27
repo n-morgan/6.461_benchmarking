@@ -16,7 +16,7 @@ def exact_match(ref: str, pred: str) -> bool:
 
 
 # Load the model-only benchmark dataset
-with open("model_responses_trial.json", "r") as f:
+with open("model_responses.json", "r") as f:
     data = json.load(f)
 
 # Containers for score tracking

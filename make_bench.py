@@ -5,6 +5,7 @@ import re
 
 import os
 
+NUM_SAMPLES = 300
 SCHEMA_DIR = "scope_schemas"
 
 def load_schema_files(schema_dir=SCHEMA_DIR):
@@ -115,7 +116,7 @@ samples_by_category =  None
 #     json.dump(samples_by_category, f, indent=2)
 
 
-with open("dataset_samples/raw_samples/sample_by_cat_300.json", "r") as f:
+with open(f"dataset_samples/raw_samples/sample_by_cat_{NUM_SAMPLES}.json", "r") as f:
     samples_by_category = json.load(f)
 
 
@@ -449,7 +450,7 @@ for CHOSEN_PROMPT in chosen_categories:
 # -----------------------------
 # Save to JSON
 # -----------------------------
-    with open(f"benchmark_datasets/300/benchmark_dataset_300_{file_id}.json", "w") as f:
+    with open(f"benchmark_datasets/{NUM_SAMPLES}/benchmark_dataset_{NUM_SAMPLES}_{file_id}.json", "w") as f:
         json.dump(final_benchmark, f, indent=2)
 
     print(f"Saved {len(final_benchmark)} benchmark examples to benchmark_dataset_{file_id}.json")

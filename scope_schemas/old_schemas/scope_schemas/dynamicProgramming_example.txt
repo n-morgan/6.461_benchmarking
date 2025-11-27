@@ -1,0 +1,52 @@
+Question optimal_bst:
+p: [0.06 0.116 0.097 0.007 0], q: [0.022 0.179 0.166 0.167 0.184], 
+initial_trace: [[0 0 0 0 0], [0 0 0 0 0], [0 0 0 0 0], [0 0 0 0 0], [0 0 0 0 0]]
+trace | root:
+
+dynamic_programming_thought_schema = {
+    "Step Metadata": {
+        "Step ID": 0
+        "Problem Name": "Optimal_bst",
+        "Operation Type": "Compute Recurrence", 
+        "Explanation": "Computing the recurrence relationship for an initial call to solving the problem at step 0",      },
+
+    "Core State Representation": {
+        "Input Representation": {
+            "type": "dictionary of lists",
+            "description":  dict{“p”:  [0.06 0.116 0.097 0.007 0], “q”: [0.022 0.179 0.166 0.167 0.184], “initial_trace”: [[0 0 0 0 0], [0 0 0 0 0], [0 0 0 0 0], [0 0 0 0 0], [0 0 0 0 0]]},
+        },
+        "Subproblem Table": {
+            "type": “Dictionary",
+            "description": “e[i][j] – e is a dictionary representing the expected cost for searching tree spanning i to j",
+        },
+        "Current Subproblem Focus": {
+            "type": "e[1][n]",
+            "description": "The subproblem currently being computed or considered. This is the first initial recursive call to the solution",
+        },
+        "Base Case Indicator": {
+            "type": e[i][i-1],
+            "description": “return q_{i-1}”
+        },
+        "Termination Condition": {
+            "type":” e[1][n] returns a value”,
+            "description": "when e[1][n] returns a value, all subproblems computed.",
+        },
+    },
+
+    "Focused Action": {
+        "Recurrence Application": {
+            "type": e[i][j]=min_{r=i}^{j}​(e[i][r−1]+e[r+1][j]+w[i][j])  where w[i][j] = sum from k=1 to i of p_k + sum from k=1 to j of q_k
+            "description": "Result of combining previously computed subproblems according to recurrence.",
+        },
+        "Decision Variables / Choices": {
+            "type": "[i,j]",
+            "description": "choose j that minimizes the expression in “Recurrence Application",
+        },
+        "Reasoning / Action Plan": {
+            "type": "Recurrence calls on e[i][j]",
+            "description": "This is the first recurrence call for choosing indices i,j",
+        },
+    }
+}
+
+<answer> [[0 0 1 1 2], [0 0 1 1 2], [0 0 0 2 2], [0 0 0 0 3], [0 0 0 0 0]]<\answer>

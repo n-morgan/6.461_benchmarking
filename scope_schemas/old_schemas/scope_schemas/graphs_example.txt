@@ -1,0 +1,147 @@
+Note: make compatible the general schema 
+Worked example with answer tags 
+Include a blank schema without answer tags
+Convert all code into Markdown x Python
+GRAPH_ALGORITHM_SCHEMA = """--- Graph Algorithm Schema ---
+
+Input:
+- algorithm: <algorithm_name>   # e.g., "DFS", "BFS", "Dijkstra"
+- graph:
+    type: "adjacency_list" | "adjacency_matrix"
+    value: [...]                 # adjacency structure
+- source_node: <s>              # only for single-source algorithms
+- example_output: [...]          # optional, for reference
+
+Step 1: Initialize variables
+- DFS / BFS:
+    pi = [NIL for each node]        # predecessor array
+    visited = [False for each node]
+- Dijkstra / Prim:
+    pi = [NIL for each node]        # predecessor array
+    dist = [∞ for each node]        # distance array (Dijkstra)
+    key = [∞ for each node]         # Prim's key array
+    visited = [False for each node]
+- Topological Sort:
+    visited = [False for each node]
+    topo_order = []
+- Articulation Points / Bridges / SCC:
+    discovery_time = [NIL for each node]
+    low = [NIL for each node]
+    pi = [NIL for each node]
+    visited = [False for each node]
+
+Step 2: Select traversal / algorithm
+- DFS: recursive or stack-based deep traversal
+- BFS: queue-based level traversal
+- Topological Sort: DFS with post-order appends
+- Articulation Points / Bridges: DFS with low values
+- SCC (Kosaraju): two-pass DFS (first for finishing times, second on transposed graph)
+- Dijkstra: min-heap, extract-min and relax neighbors
+- Prim: min-heap, extract-min key and update neighboring keys
+
+Step 3: Iterate through nodes / edges
+- DFS / BFS / Topological / SCC / AP/Bridges:
+    for each node u in graph:
+        if not visited[u]:
+            call dfs_visit(u)
+- Dijkstra / Prim:
+    while priority_queue not empty:
+        u = extract_min()
+        for each neighbor v of u:
+            relax(u, v)        # update dist or key and pi if necessary
+
+Step 4: Update final output
+- DFS / BFS: pi array (predecessor tree)
+- Topological Sort: topo_order array
+- Articulation Points / Bridges: list of nodes or edges
+- SCC (Kosaraju / Tarjan): component assignment per node
+- Dijkstra / Prim: pi array + dist/key array
+
+Step 5: Solve for final output
+Output:
+{
+  "pi": [...],           # predecessor array, if applicable
+  "dist": [...],         # for weighted algorithms (Dijkstra)
+  "key": [...],          # for Prim's MST
+  "topo_order": [...],   # for topological sort
+  "components": [...]    # for SCC
+}
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BFS_EXAMPLE = """Algorithm: BFS (Breadth-First Search)
+Input:
+algorithm: "BFS"
+graph:
+  type: "adjacency_matrix"
+  value:
+    [[0, 1, 0, 0, 1, 0],
+     [1, 0, 0, 1, 0, 0],
+     [0, 0, 0, 0, 0, 0],
+     [0, 1, 0, 1, 0, 0],
+     [1, 0, 0, 0, 1, 0],
+     [0, 0, 0, 0, 0, 1]]
+source_node: 0
+initial_trace: [0, 1, 2, 3, 4, 5]
+
+
+Step 1: Initialize variables
+visited = [False, False, False, False, False, False]
+pi = [None, None, None, None, None, None]
+queue = []
+
+
+Step 2: Select traversal
+BFS → Queue-based level traversal.
+
+Step 3: Iterate through nodes / edges
+enqueue(0)
+visited[0] = True
+
+dequeue(0) → visit neighbors [1, 4]
+    enqueue(1), enqueue(4)
+    pi[1] = 0, pi[4] = 0
+
+dequeue(1) → visit neighbors [3]
+    enqueue(3)
+    pi[3] = 1
+
+dequeue(4) → no new neighbors
+dequeue(3) → visit neighbors [1] → already visited
+
+enqueue remaining nodes not connected to visited (node 2 and 5) if using full initial_trace logic:
+    node 2 → disconnected, pi[2] = 2 (self)
+    node 5 → self-loop, pi[5] = 5
+
+
+Step 4: Update final output
+pi = [0, 0, 2, 1, 0, 5]
+
+
+Output:
+{
+  "pi": [0, 0, 2, 1, 0, 5]
+}
+"""
+
+
+ <answer> [0, 0, 2, 1, 0, 5] <\answer>
+
+
+
+
+
+

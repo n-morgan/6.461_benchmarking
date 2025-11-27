@@ -1,0 +1,56 @@
+Input
+algorithm: <algorithm_name>                 
+goal: <maximize_or_minimize>                
+items: [                                     
+  { <feature1>: ..., <feature2>: ..., ... },
+  ...
+]
+example_output: [...]                        
+
+Step 1: Initialize Variables
+n = number_of(items)
+selected = []
+state = {}                                    
+
+# Define any problem-specific initial state
+# Examples:
+# state["last_finish"] = -inf
+# state["remaining_capacity"] = C
+# state["remaining_amount"] = amount
+
+Step 2: Define Greedy Criterion
+# Step 2a: scoring rule
+define greedy_key(item):
+    return <feature used to rank items>
+
+# Step 2b: sort
+items_sorted = sort(items, by=greedy_key)
+
+# Optional one-sentence rationale.
+
+Step 3: Define Feasibility Condition
+define feasible(item, state):
+    return <boolean feasibility condition>
+
+# Examples:
+# item.start >= state["last_finish"]
+# item.value <= state["remaining_amount"]
+
+Step 4: Iterate Through Items
+for item in items_sorted:
+    if feasible(item, state):
+        selected.append(item)
+        update state using item
+        # e.g., state["last_finish"] = item.finish
+
+Step 5: Optional Verification
+# Use a tiny example (≤3 items) to verify
+# the greedy rule and feasibility logic.
+
+Step 6: Return Final Output
+total_value = compute_value(selected)
+return {
+  "selected": selected,
+  "total_value": total_value,
+  "state": state
+}

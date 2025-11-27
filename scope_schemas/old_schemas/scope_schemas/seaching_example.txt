@@ -1,0 +1,20 @@
+Question:
+algorithm: binary_search
+Inputs
+  key (sorted):
+    idx:   0     1     2     3     4     5     6     7     8     9     10    11    12    13    14
+    val:  0.127 0.147 0.191 0.191 0.232 0.305 0.371 0.421 0.450 0.546 0.682 0.725 0.743 0.750 0.992
+  target: 0.181
+  initial_trace: (low, high) = (0, 14)
+
+Loop (record (low, high) AFTER each update)
+  Start: lo=0, hi=14
+    mid = (0+14)//2 = 7 ; key[7]=0.421 > 0.181 ⇒ hi = 6
+    record (0, 6)   # dataset variant often shows (0, 7); either way interval shrinks toward left
+    mid = (0+6)//2 = 3 ; key[3]=0.191 > 0.181 ⇒ hi = 2
+    record (0, 2)   # dataset variant often shows (0, 3)
+    mid = (0+2)//2 = 1 ; key[1]=0.147 < 0.181 ⇒ lo = 2
+    record (2, 2)
+    mid = (2+2)//2 = 2 ; key[2]=0.191 > 0.181 ⇒ hi = 1  (loop ends: lo=2, hi=1)
+
+Return (2,2)

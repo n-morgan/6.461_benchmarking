@@ -4,12 +4,13 @@ from openai import OpenAI
 
 # Initialize client
 client = OpenAI(
-    base_url="http://0.0.0.0:30000/v1",
+    base_url="http://0.0.0.0:20000/v1",
     api_key="sk",
 )
 
+NUM_SAMPLES=3000
 # Load benchmark dataset (with question, answer, cot_prompt)
-with open("benchmark_datasets/300/benchmark_dataset_300_scope.json", "r") as f:
+with open(f"benchmark_datasets/{NUM_SAMPLES}/benchmark_dataset_{NUM_SAMPLES}_scope.json", "r") as f:
     final_benchmark = json.load(f)
 # Collect simplified results
 results = []
