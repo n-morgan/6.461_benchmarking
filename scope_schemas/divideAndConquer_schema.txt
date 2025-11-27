@@ -1,41 +1,78 @@
-1. PROBLEM HEADER
-- algorithm: <algorithm_name>
-- input: <input_data>
-- goal: <brief one-sentence description>
+INPUT
+algorithm: <algorithm_name>
+input: <input_data>
+goal: <brief one-sentence description>
 
-2. BASE CASE
-If the input size is 0 or 1:
-    - Compute the answer directly with no recursion.
-    - Return the direct result.
+---
+STEP 1: IDENTIFY PATTERN
+Pattern: <binary_split | cross_subproblem | multi_way | recursive_reduction>
+Why: <one sentence explaining why this pattern applies>
 
-3. DIVIDE
-Describe exactly how the problem is split:
-    - mid = n // 2
-    - left_part = input[0:mid]
-    - right_part = input[mid:n]
+---
+STEP 2: BASE CASE
+If size <= <threshold>:
+    return <direct computation>
 
-4. CONQUER
-Recursively solve each subproblem:
-    - left_solution = solve(left_part)
-    - right_solution = solve(right_part)
+---
+STEP 3: DIVIDE
+[binary_split / cross_subproblem]
+    mid = len(input) // 2
+    left_part = input[:mid]
+    right_part = input[mid:]
 
-(If the algorithm requires it)
-    - cross_solution = compute_cross(input, mid)
+[multi_way]
+    pivot = <pivot selection>
+    parts = partition(input, pivot)  # e.g., [<pivot, =pivot, >pivot]
 
-5. COMBINE
-Based on the algorithm rules, combine:
-    - choose among {left_solution, right_solution, cross_solution}
-or
-    - merge the sub-results into the final result
+[recursive_reduction]
+    next_input = <reduced input based on condition>
 
-Clearly state:
-    final_result = <combined result>
+Applied to input:
+    <show actual division with concrete values>
 
-6. LOCAL CHECK (1-step sanity check)
-Apply the divide → conquer → combine logic to a tiny example:
-    mini_input = first 2–3 elements of input
-    Ensure steps would produce consistent behavior.
-(No full recomputation.)
+---
+STEP 4: CONQUER
+[binary_split / cross_subproblem]
+    left_solution = solve(left_part)
+    right_solution = solve(right_part)
 
-7. FINAL ANSWER
-Final Answer: <result only, no explanation>
+[multi_way]
+    solutions = [solve(part) for part in parts]
+
+[recursive_reduction]
+    solution = solve(next_input)
+
+Trace:
+    solve(<subproblem>) → <result>
+    ...
+
+---
+STEP 5: COMBINE
+[binary_split]
+    final_result = merge(left_solution, right_solution)
+
+[cross_subproblem]
+    cross_solution = compute_cross(input, mid):
+        <show key computation with intermediate values>
+    | Candidate | Value |
+    |-----------|-------|
+    | left      |       |
+    | right     |       |
+    | cross     |       |
+    final_result = best(left, right, cross)
+
+[multi_way]
+    final_result = combine(solutions)  # or select relevant partition
+
+[recursive_reduction]
+    final_result = solution  # or apply transformation
+
+final_result = <value>
+
+---
+STEP 6: VERIFY
+Check: <brief confirmation result satisfies goal>
+
+---
+ANSWER
+<answer><result></answer>

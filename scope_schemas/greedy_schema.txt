@@ -1,56 +1,54 @@
-Input
-algorithm: <algorithm_name>                 
-goal: <maximize_or_minimize>                
-items: [                                     
-  { <feature1>: ..., <feature2>: ..., ... },
+INPUT
+algorithm: <algorithm_name>
+# e.g., Activity Selection, Task Scheduling
+goal: <maximize/minimize> <quantity>
+# e.g., maximize non-overlapping activities, minimize weighted completion time
+items: [{ id: 0, ... }, { id: 1, ... }, ...]
+
+---
+STEP 1: PROBLEM UNDERSTANDING
+Objective: <what to optimize>
+Constraint: <what makes a selection valid>
+
+---
+STEP 2: GREEDY STRATEGY
+Sort by: <property> (<ascending/descending>)
+# Activity Selection: finish time (ascending)
+# Task Scheduling: processing time (ascending) or ratio weight/time (descending)
+Why: <one sentence justification>
+
+Feasibility rule: item.<property> <condition> state.<variable>
+Invariant: <condition that stays true after each selection>
+
+---
+STEP 3: INITIALIZE
+selected = []
+state = { <variable>: <initial_value> }
+
+---
+STEP 4: SORT
+items_sorted = [
+  { id: _, ... },  # rank 0
+  { id: _, ... },  # rank 1
   ...
 ]
-example_output: [...]                        
 
-Step 1: Initialize Variables
-n = number_of(items)
-selected = []
-state = {}                                    
+---
+STEP 5: ITERATE
+| Rank | ID | Check | Result | Action | State Update |
+|------|----| ------|--------|--------|--------------|
+| 0    |    |       |        |        |              |
+| 1    |    |       |        |        |              |
+...
 
-# Define any problem-specific initial state
-# Examples:
-# state["last_finish"] = -inf
-# state["remaining_capacity"] = C
-# state["remaining_amount"] = amount
+---
+STEP 6: VERIFY
+Selected: [...]
+Constraint check: <brief confirmation all selected items are valid together>
 
-Step 2: Define Greedy Criterion
-# Step 2a: scoring rule
-define greedy_key(item):
-    return <feature used to rank items>
+---
+ANSWER
+selected = [<ids>]
+value = <total>
 
-# Step 2b: sort
-items_sorted = sort(items, by=greedy_key)
-
-# Optional one-sentence rationale.
-
-Step 3: Define Feasibility Condition
-define feasible(item, state):
-    return <boolean feasibility condition>
-
-# Examples:
-# item.start >= state["last_finish"]
-# item.value <= state["remaining_amount"]
-
-Step 4: Iterate Through Items
-for item in items_sorted:
-    if feasible(item, state):
-        selected.append(item)
-        update state using item
-        # e.g., state["last_finish"] = item.finish
-
-Step 5: Optional Verification
-# Use a tiny example (≤3 items) to verify
-# the greedy rule and feasibility logic.
-
-Step 6: Return Final Output
-total_value = compute_value(selected)
-return {
-  "selected": selected,
-  "total_value": total_value,
-  "state": state
-}
+<answer>[n values: position i = 1 if item i selected, else 0]</answer>

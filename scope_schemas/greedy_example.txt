@@ -1,54 +1,63 @@
-Input
-algorithm: "Activity Selection"
-goal: "maximize number of non-overlapping activities"
+INPUT
+algorithm: Activity Selection
+goal: maximize number of non-overlapping activities
 items: [
-  {start: 1, finish: 2},
-  {start: 3, finish: 4},
-  {start: 0, finish: 6},
-  {start: 5, finish: 7},
-  {start: 8, finish: 9},
-  {start: 5, finish: 9}
+  { id: 0, start: 1, finish: 2 },
+  { id: 1, start: 3, finish: 4 },
+  { id: 2, start: 0, finish: 6 },
+  { id: 3, start: 5, finish: 7 },
+  { id: 4, start: 8, finish: 9 },
+  { id: 5, start: 5, finish: 9 }
 ]
-example_output: [0, 1, 3, 4]
 
-Step 1: Initialize Variables
-n = 6
+---
+STEP 1: PROBLEM UNDERSTANDING
+Objective: Select maximum number of activities
+Constraint: No two selected activities can overlap
+
+---
+STEP 2: GREEDY STRATEGY
+Sort by: finish (ascending)
+Why: Earliest finish leaves most room for future activities
+
+Feasibility rule: item.start >= state.last_finish
+Invariant: All selected activities are non-overlapping
+
+---
+STEP 3: INITIALIZE
 selected = []
-state = {"last_finish": -inf}
+state = { last_finish: -inf }
 
-Step 2: Define Greedy Criterion
-define greedy_key(item):
-    return item.finish
-
-items_sorted =
-[
-  {start:1,finish:2},   # index 0
-  {start:3,finish:4},   # index 1
-  {start:5,finish:7},   # index 3
-  {start:0,finish:6},   # index 2
-  {start:8,finish:9},   # index 4
-  {start:5,finish:9}    # index 5
+---
+STEP 4: SORT
+items_sorted = [
+  { id: 0, start: 1, finish: 2 },  # rank 0
+  { id: 1, start: 3, finish: 4 },  # rank 1
+  { id: 2, start: 0, finish: 6 },  # rank 2
+  { id: 3, start: 5, finish: 7 },  # rank 3
+  { id: 4, start: 8, finish: 9 },  # rank 4
+  { id: 5, start: 5, finish: 9 }   # rank 5
 ]
 
-# Rationale: earliest finishing activity leaves maximum room.
+---
+STEP 5: ITERATE
+| Rank | ID | Check      | Result | Action | State Update    |
+|------|----|------------|--------|--------|-----------------|
+| 0    | 0  | 1 >= -inf  | True   | SELECT | last_finish = 2 |
+| 1    | 1  | 3 >= 2     | True   | SELECT | last_finish = 4 |
+| 2    | 2  | 0 >= 4     | False  | SKIP   | -               |
+| 3    | 3  | 5 >= 4     | True   | SELECT | last_finish = 7 |
+| 4    | 4  | 8 >= 7     | True   | SELECT | last_finish = 9 |
+| 5    | 5  | 5 >= 9     | False  | SKIP   | -               |
 
-Step 3: Define Feasibility
-define feasible(item, state):
-    return item.start >= state["last_finish"]
+---
+STEP 6: VERIFY
+Selected: [0, 1, 3, 4]
+Constraint check: [1,2) → [3,4) → [5,7) → [8,9) all non-overlapping ✓
 
-Step 4: Iterate
-item 0 → start=1 >= -inf → select → last_finish=2
-item 1 → start=3 >= 2   → select → last_finish=4
-item 3 → start=5 >= 4   → select → last_finish=7
-item 2 → start=0 < 7    → skip
-item 4 → start=8 >= 7   → select → last_finish=9
-item 5 → start=5 < 9    → skip
+---
+ANSWER
+selected = [0, 1, 3, 4]
+value = 4
 
-Step 6: Final Output
-{
-  "selected": [0, 1, 3, 4],
-  "total_value": null,
-  "state": {"last_finish": 9}
-}
-
-<answer>[0 1 0 1 1 0]</answer>
+<answer>[1 1 0 1 1 0]</answer>
