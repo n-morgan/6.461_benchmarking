@@ -4,7 +4,7 @@ This repository benchmarks models on algorithmic math problems using prompts. It
 
 ## File Structure
 
-- `make_base_bench.py` – Generate the benchmark dataset with cleaned questions, example outputs, and COT prompts.
+- `make_base_bench.py` – Generate the benchmark dataset with cleaned questions, example outputs, and prompts.
 - `test_model.py` – Run the model on the benchmark dataset and collect model outputs.
 - `eval.py` – Parse model outputs, extract answers, and compute exact-match scores.
 
@@ -19,7 +19,7 @@ python make_base_bench.py
 This produces a JSON file (`benchmark_dataset.json`) containing:
 - `question`
 - `example_output`
-- `cot_prompt`
+- `prompt`
 - `answer` (ground truth)
 
 2. **Run the model on the dataset**
